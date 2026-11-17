@@ -5,7 +5,7 @@ Imports System.Threading.Tasks
 Imports Trips.Application
 
 <ApiController>
-<Route("api/schedules")>
+<Route("api/v1/schedules")>
 Public Class SchedulesController
     Inherits ControllerBase
 
