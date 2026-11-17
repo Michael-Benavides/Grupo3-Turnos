@@ -75,7 +75,9 @@ Module Program
 
         ' Base de datos y servicios
         Dim configureDatabase As New Action(Of DbContextOptionsBuilder)(Sub(options) options.UseSqlServer(builder.Configuration.GetConnectionString("TripsDb")))
-        builder.Services.AddDbContext(Of TripsDbContext)(configureDatabase)
+        If Not builder.Environment.IsEnvironment("Testing") Then
+    builder.Services.AddDbContext(Of TripsDbContext)(configureDatabase)
+End If
         builder.Services.AddScoped(Of ISchedulingService, SchedulingService)()
         builder.Services.AddSingleton(Of IFareCalculator, FareCalculator)()
         builder.Services.AddHostedService(Of SeatHoldCleaner)()
