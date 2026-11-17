@@ -6,7 +6,7 @@ Imports Trips.Application
 Imports Trips.Domain
 
 <ApiController>
-<Route("api/trips")>
+<Route("api/v1/trips")>
 Public Class TripsController
     Inherits ControllerBase
 
