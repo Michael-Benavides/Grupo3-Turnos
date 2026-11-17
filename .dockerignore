@@ -1,0 +1,7 @@
+.env
+.git
+.vs
+**/bin
+**/obj
+**/TestResults
+src/Trips.Api/appsettings.Development.json

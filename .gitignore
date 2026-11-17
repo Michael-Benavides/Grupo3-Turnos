@@ -1,0 +1,27 @@
+# Build results
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Test results
+TestResults/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# IDE
+.vscode/
+
+# Local secrets
+.env
+src/Trips.Api/appsettings.Development.json

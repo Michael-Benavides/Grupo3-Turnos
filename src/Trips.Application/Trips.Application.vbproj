@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Trips.Domain\Trips.Domain.vbproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <RootNamespace>Trips.Application</RootNamespace>
+    <TargetFramework>net11.0</TargetFramework>
+  </PropertyGroup>
+
+</Project>
