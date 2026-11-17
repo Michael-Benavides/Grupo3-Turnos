@@ -21,5 +21,8 @@
     <ProjectReference Include="..\Trips.Application\Trips.Application.vbproj" />
     <ProjectReference Include="..\Trips.Infrastructure\Trips.Infrastructure.vbproj" />
   </ItemGroup>
+  <ItemGroup>
+  <InternalsVisibleTo Include="Trips.Tests" />
+  </ItemGroup>
 
 </Project>
