@@ -5,7 +5,19 @@
     "version": "1.0"
   },
   "paths": {
-    "/api/schedules": {
+    "/api/v1/dev/reset": {
+      "get": {
+        "tags": [
+          "Dev"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/schedules": {
       "post": {
         "tags": [
           "Schedules"
@@ -99,7 +111,7 @@
         }
       }
     },
-    "/api/schedules/{id}": {
+    "/api/v1/schedules/{id}": {
       "put": {
         "tags": [
           "Schedules"
@@ -179,7 +191,7 @@
         }
       }
     },
-    "/api/trips/{id}/seats": {
+    "/api/v1/trips/{id}/seats": {
       "get": {
         "tags": [
           "Trips"
@@ -228,7 +240,7 @@
         }
       }
     },
-    "/api/trips/generate": {
+    "/api/v1/trips/generate": {
       "post": {
         "tags": [
           "Trips"
@@ -276,7 +288,7 @@
         }
       }
     },
-    "/api/trips": {
+    "/api/v1/trips": {
       "get": {
         "tags": [
           "Trips"
@@ -339,7 +351,7 @@
         }
       }
     },
-    "/api/trips/{id}/price": {
+    "/api/v1/trips/{id}/price": {
       "get": {
         "tags": [
           "Trips"
@@ -379,7 +391,7 @@
         }
       }
     },
-    "/api/trips/{tripId}/seats/{seatNumber}/hold": {
+    "/api/v1/trips/{tripId}/seats/{seatNumber}/hold": {
       "post": {
         "tags": [
           "Trips"
@@ -513,7 +525,7 @@
         }
       }
     },
-    "/api/trips/{tripId}/seats/{seatNumber}/confirm": {
+    "/api/v1/trips/{tripId}/seats/{seatNumber}/confirm": {
       "post": {
         "tags": [
           "Trips"
@@ -577,18 +589,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/health": {
-      "get": {
-        "tags": [
-          "Trips.Api"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
           }
         }
       }
@@ -887,13 +887,13 @@
   },
   "tags": [
     {
+      "name": "Dev"
+    },
+    {
       "name": "Schedules"
     },
     {
       "name": "Trips"
-    },
-    {
-      "name": "Trips.Api"
     }
   ]
 }
