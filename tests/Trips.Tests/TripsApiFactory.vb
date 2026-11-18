@@ -6,6 +6,7 @@ Imports Microsoft.EntityFrameworkCore
 Imports System
 Imports System.Linq
 Imports System.Threading
+Imports System.Threading.Tasks
 Imports Trips.Api
 Imports Trips.Application
 Imports Trips.Infrastructure
@@ -14,21 +15,29 @@ Imports Trips.Domain
 Public Class TripsApiFactory
     Inherits WebApplicationFactory(Of ApiMarker)
 
+    ' Un único nombre de base por fábrica: todos los requests comparten los mismos datos
+    Private ReadOnly _dbName As String = "TripsTests-" & Guid.NewGuid().ToString()
+
     Protected Overrides Sub ConfigureWebHost(builder As IWebHostBuilder)
         builder.UseEnvironment("Testing")
         builder.ConfigureServices(Sub(services)
-            '--- Replace DbContext with InMemory (unique name) ---
-            Dim dbDescriptor = services.FirstOrDefault(Function(d) d.ServiceType = GetType(TripsDbContext))
-            If dbDescriptor IsNot Nothing Then services.Remove(dbDescriptor)
-            services.AddDbContext(Of TripsDbContext)(Function(options) options.UseInMemoryDatabase(Guid.NewGuid().ToString()))
+                                      ' Quitar cualquier registro previo del DbContext
+                                      Dim toRemove = services.Where(Function(d) d.ServiceType = GetType(DbContextOptions(Of TripsDbContext)) OrElse d.ServiceType = GetType(TripsDbContext)).ToList()
+                                      For Each d In toRemove
+                                          services.Remove(d)
+                                      Next
+                                      Dim name As String = _dbName
+                                      services.AddDbContext(Of TripsDbContext)(Sub(options) options.UseInMemoryDatabase(name))
 
-            '--- Remove SeatHoldCleaner hosted service ---
-            Dim shd = services.FirstOrDefault(Function(d) d.ServiceType = GetType(IHostedService) AndAlso d.ImplementationType?.Name = "SeatHoldCleaner")
-            If shd IsNot Nothing Then services.Remove(shd)
+                                      ' Quitar SeatHoldCleaner
+                                      Dim cleaners = services.Where(Function(d) d.ServiceType = GetType(IHostedService) AndAlso d.ImplementationType IsNot Nothing AndAlso d.ImplementationType.Name = "SeatHoldCleaner").ToList()
+                                      For Each d In cleaners
+                                          services.Remove(d)
+                                      Next
 
-            '--- Add seeder hosted service that runs once on start ---
-            services.AddSingleton(Of IHostedService)(Function(sp) New SeedHostedService(sp))
-        End Sub)
+                                      ' Sembrar al arrancar el host
+                                      services.AddSingleton(Of IHostedService, SeedHostedService)()
+                                  End Sub)
     End Sub
 
     Private Class SeedHostedService
@@ -44,30 +53,25 @@ Public Class TripsApiFactory
             Using scope = _provider.CreateScope()
                 Dim db = scope.ServiceProvider.GetRequiredService(Of TripsDbContext)()
                 Dim scheduling = scope.ServiceProvider.GetRequiredService(Of ISchedulingService)()
-                Dim routes = scope.ServiceProvider.GetRequiredService(Of IRoutesClient)()
 
-                '--- Create a single schedule template ---
-                Dim routeId = Guid.NewGuid()
-                Dim busId = Guid.NewGuid()
                 db.ScheduleTemplates.Add(New ScheduleTemplate With {
                     .Id = Guid.NewGuid(),
-                    .RouteId = routeId,
-                    .BusId = busId,
+                    .RouteId = Guid.NewGuid(),
+                    .BusId = Guid.NewGuid(),
                     .Shift = Shift.Morning,
                     .DepartureTime = New TimeSpan(8, 0, 0),
                     .BasePrice = 10D,
                     .IsActive = True
                 })
-                Await db.SaveChangesAsync()
+                Await db.SaveChangesAsync(cancellationToken)
 
-                '--- Generate trips for today ---
+                ' Hoy y mañana, así siempre hay un viaje aunque la hora de hoy ya haya pasado
                 Dim request = New GenerateTripsRequest With {
                     .FechaDesde = DateOnly.FromDateTime(DateTime.UtcNow.Date),
-                    .FechaHasta = DateOnly.FromDateTime(DateTime.UtcNow.Date)
+                    .FechaHasta = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(1))
                 }
-                Await scheduling.GenerateTripsAsync(request, CancellationToken.None)
+                Await scheduling.GenerateTripsAsync(request, cancellationToken)
             End Using
-            ' No explicit return needed for async Task
         End Function
 
         Public Function StopAsync(cancellationToken As CancellationToken) As Task Implements IHostedService.StopAsync
